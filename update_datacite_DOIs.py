@@ -49,7 +49,7 @@ def prepare_datacite_doi_payload(config, xml_path):
     print(f"Original DOI found: {original_doi}")
 
     # Construct the full DOI
-    if prefix != "":
+    if test_doi_prefix != "":
         suffix = original_doi.replace(original_doi_prefix, "")
         full_doi = f"{test_doi_prefix}/{suffix}"
     else:
