@@ -1,0 +1,197 @@
+import requests
+import base64
+import json
+import xml.etree.ElementTree as ET
+import os
+
+def load_config(config_path='config.json'):
+    """
+    Load configuration from JSON file
+    """
+    try:
+        with open(config_path, 'r') as f:
+            return json.load(f)
+    
+    except FileNotFoundError:
+        print(f"Configuration file {config_path} not found.")
+        return None
+    
+    except json.JSONDecodeError:
+        print(f"Invalid JSON in {config_path}")
+        return None
+
+def prepare_datacite_doi_payload(config, xml_path):
+    """
+    Prepare payload for DOI creation using the XML resource
+    
+    :param xml_path: Path to the XML resource file
+    :param prefix: DataCite DOI prefix (e.g., '10.xxxxx')
+    :return: Dictionary with payload for DOI creation
+    """
+
+    prefix = config["doi_prefix"]
+
+    # Parse the XML resource
+    tree = ET.parse(xml_path)
+    root = tree.getroot()
+
+    # get id from record
+    ns = {"datacite": "http://datacite.org/schema/kernel-4"}
+
+    original_doi_elem = root.find(".//datacite:identifier[@identifierType='DOI']", namespaces=ns)
+
+    if original_doi_elem is None:
+        raise ValueError("No DOI identifier found in XML")
+
+    original_doi = original_doi_elem.text.strip()
+
+    print(f"Original DOI found: {original_doi}")
+    suffix = original_doi.replace("10.6092/", "")
+
+    # Construct the full DOI
+    full_doi = f"{prefix}/{suffix}"
+    #full_doi = original_doi
+    print(f"Updating to {full_doi}")
+
+    # Prepare the payload
+    payload = {
+
+        "data": {
+            "type": "dois",
+            "attributes": {
+                "event": "publish",
+                "doi": full_doi,
+                "xml": None,
+                "url": None
+            }
+        }    
+    }
+
+    # Add URL
+    url_elem = root.find(".//datacite:alternateIdentifiers/datacite:alternateIdentifier[@alternateIdentifierType='URL']", namespaces=ns)
+    
+    if url_elem is not None:
+        payload["data"]["attributes"]["url"] = url_elem.text
+
+    return payload, full_doi
+
+def create_doi(config, xml_path, xml_base64=True):
+    """
+    Create a DOI for a given XML resource
+    
+    :param xml_path: Path to the XML resource file
+    :param username: DataCite API username
+    :param password: DataCite API password
+    :param xml_base64: Whether to include base64 encoded XML, default True
+    :return: Created DOI or None if failed
+    """
+    
+    username = config["user"]
+    password = config["password"]
+    url = config["api_base_url"]
+
+    try:
+        # Prepare payload for DOI metadata
+        payload, full_doi = prepare_datacite_doi_payload(config, xml_path)
+
+        # Optionally add base64 encoded XML
+        if xml_base64:
+            with open(xml_path, 'rb') as xml_file:
+                xml_content = xml_file.read()
+                payload['data']['attributes']['xml'] = base64.b64encode(xml_content).decode('utf-8')
+
+        # Prepare headers
+        headers = {
+            "Content-Type": "application/vnd.api+json",
+            "Accept": "application/vnd.api+json"
+        }
+        
+        '''
+        # Send POST request to create DOI
+        response = requests.post(
+            url,
+            auth=(username, password),
+            headers=headers,
+            json=payload
+        )
+        '''
+
+        # Send PUT request to update DOI
+        # It creates new DOIs if the doi does not exist
+
+        update_url = f"https://api.test.datacite.org/dois/{full_doi}"
+        
+        response = requests.put(
+            update_url,
+            json=payload,
+            auth=(config["user"], config["password"]),
+            headers={"Content-Type": "application/vnd.api+json"}
+        )
+
+        # Check response
+        if response.status_code in [200, 201]:
+            print(f"Successfully created DOI: {full_doi}")
+            return full_doi
+        else:
+            print(f"Failed to create DOI. Status code: {response.status_code}")
+            print(f"Response: {response.text}")
+
+            return None
+        
+    except Exception as e:
+        print(f"Error creating DOI: {e}")
+        return None
+
+# Example usage
+def batch_create_dois(config):
+    """
+    Create DOIs for all XML files in a directory
+    
+    :param xml_directory: Directory containing XML resource files
+    :param prefix: DataCite DOI prefix
+    :param username: DataCite API username
+    :param password: DataCite API password
+    """
+
+    xml_directory = config["extracted_dir"]
+
+    # Ensure the directory exists
+    if not os.path.exists(xml_directory):
+        print(f"Directory {xml_directory} does not exist.")
+        return
+
+    # Track created DOIs
+    created_dois = []
+
+    # Iterate through XML files
+    for filename in os.listdir(xml_directory):
+        if filename.endswith('.xml'):
+            xml_path = os.path.join(xml_directory, filename)
+            
+            try:
+                # Create DOI for each XML file
+                doi = create_doi(config, xml_path)
+                if doi:
+                    created_dois.append((filename, doi))
+            
+            except Exception as e:
+                print(f"Error processing {filename}: {e}")
+
+    # Optional: Log created DOIs
+    print("\nCreated DOIs:")
+    for filename, doi in created_dois:
+        print(f"{filename}: {doi}")
+
+# Usage example (commented out for safety)
+# batch_create_dois(
+#     xml_directory='path/to/extracted/resources', 
+#     prefix='10.XXXXX',  # Your actual DataCite prefix
+#     username='your_username', 
+#     password='your_password'
+# )
+
+
+if __name__ == "__main__":
+    config = load_config()
+    if config:
+        batch_create_dois(config)
