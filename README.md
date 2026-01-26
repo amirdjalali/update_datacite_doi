@@ -11,7 +11,7 @@ This repository contains scripts to update the metadata of DOIs registered with 
 ## Prerequisites
 
 - Python 3.x
-- Required Python packages: requests, xml.etree.ElementTree
+- Required Python packages: requests, xml.etree.ElementTree, lxml
 - DataCite account with API access
 
 ## Configuration
