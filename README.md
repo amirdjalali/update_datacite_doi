@@ -25,9 +25,9 @@ The script updates the metadata of the DOIs in DataCite using the DataCite REST 
             )
 ```
 
-where ```payload``` is a json with the following strcuture
+where ```payload``` is a dictionary with the following strcuture:
 
-```json
+```python
     payload = {
 
         "data": {
