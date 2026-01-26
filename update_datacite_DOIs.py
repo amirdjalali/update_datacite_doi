@@ -20,6 +20,19 @@ def load_config(config_path='config.json'):
         print(f"Invalid JSON in {config_path}")
         return None
 
+def clean_doi(doi):
+    if doi.startswith("https://doi.org/"):
+        doi = doi.replace("https://doi.org/", "")
+    return doi
+
+def extract_doi_prefix(doi):
+    # Check if the DOI starts with "https://doi.org/"
+    doi = clean_doi(doi)
+    
+    # Split the DOI by '/' and return the prefix (first part)
+    prefix = doi.split('/')[0]
+    return prefix
+
 def prepare_datacite_doi_payload(config, xml_path):
     """
     Prepare payload for DOI creation using the XML resource
@@ -38,22 +51,25 @@ def prepare_datacite_doi_payload(config, xml_path):
 
     # get id from record
     ns = {"datacite": "http://datacite.org/schema/kernel-4"}
-
     original_doi_elem = root.find(".//datacite:identifier[@identifierType='DOI']", namespaces=ns)
-
+    
     if original_doi_elem is None:
         raise ValueError("No DOI identifier found in XML")
 
-    original_doi = original_doi_elem.text.strip()
+    original_doi = clean_doi(original_doi_elem.text.strip())
 
     print(f"Original DOI found: {original_doi}")
 
+    prefix = extract_doi_prefix(original_doi)
     # Construct the full DOI
-    if test_doi_prefix != "":
-        suffix = original_doi.replace(original_doi_prefix, "")
-        full_doi = f"{test_doi_prefix}/{suffix}"
+    if prefix == original_doi_prefix: # in case of DOIs already registered with DataCite
+        full_doi = original_doi
+        if test_doi_prefix != "": # if working in the test environment, replace original prefix with test prefix
+            suffix = original_doi.replace(f"{original_doi_prefix}/", "")
+            full_doi = f"{test_doi_prefix}/{suffix}"
     else:
         full_doi = original_doi
+
     
     print(f"Updating to {full_doi}")
 

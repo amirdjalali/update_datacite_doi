@@ -26,8 +26,8 @@ The ```config.json``` file should look like this:
     "api_base_url": "<https://api.test.datacite.org/dois> or <https://api.datacite.org/dois>",
     "downloaded_dir": "oai_xml_records",
     "extracted_dir": "extracted_xml_resources",
-    "test_doi_prefix": "your test DOI prefix, including /. Add only if you are working in the test environment",
-    "original_doi_prefix": "your original DOI prefix, including /. Add only if you are working in the test environment"
+    "test_doi_prefix": "your test DOI prefix, without /. Add only if you are working in the test environment",
+    "original_doi_prefix": "your original DOI prefix, without /. Add only if you are working in the test environment",
     "user": "<your DataCite username>",
     "password": "<your DataCite password>"
 }
