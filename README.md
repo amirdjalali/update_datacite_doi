@@ -56,7 +56,7 @@ The script parses each record finding the record's original DOI. If the DOI is a
 
 ## Configuration
 
-To run the script you need to set up a configuration file ```config.json``` containing the output folder names and your DataCite API credentials.
+To run the script you need to create a configuration file ```config.json``` in the root folder.
 
 The ```config.json``` file should look like this:
 
