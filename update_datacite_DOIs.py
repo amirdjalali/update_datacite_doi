@@ -29,7 +29,8 @@ def prepare_datacite_doi_payload(config, xml_path):
     :return: Dictionary with payload for DOI creation
     """
 
-    prefix = config["doi_prefix"]
+    test_doi_prefix = config["test_doi_prefix"]
+    original_doi_prefix = config["original_doi_prefix"]
 
     # Parse the XML resource
     tree = ET.parse(xml_path)
@@ -46,11 +47,14 @@ def prepare_datacite_doi_payload(config, xml_path):
     original_doi = original_doi_elem.text.strip()
 
     print(f"Original DOI found: {original_doi}")
-    suffix = original_doi.replace("10.6092/", "")
 
     # Construct the full DOI
-    full_doi = f"{prefix}/{suffix}"
-    #full_doi = original_doi
+    if prefix != "":
+        suffix = original_doi.replace(original_doi_prefix, "")
+        full_doi = f"{test_doi_prefix}/{suffix}"
+    else:
+        full_doi = original_doi
+    
     print(f"Updating to {full_doi}")
 
     # Prepare the payload
