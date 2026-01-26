@@ -2,11 +2,13 @@
 
 This repository contains scripts to update the metadata of DOIs registered with DataCite.
 
-```download_xml_records.py``` downloads the current metadata of AMS Acta DOIs through the OAI-PMH interface, and saves them in separate xml files.
+```download_xml_records.py``` downloads the current metadata of AMS Acta DOIs through the OAI-PMH interface, and saves them in separate xml files in the ```downloaded_dir```.
 
-```extract_resource_elements.py``` extracts the ```<resource>``` elements from the records downloaded with ```download_xml_records.py```, in case the metadata are exposed in the oai_datacite metadata schema.
+In case the metadata are exposed in the ```oai_datacite``` metadata schema, ```extract_resource_elements.py``` extracts the ```<resource>``` elements from the records in the ```downloaded_dir```.
 
-```update_doi_metadata.py``` updates the metadata of the DOIs in DataCite using the DataCite REST API. If working in the test environment, update your ```config.json``` file by adding your DataCite test DOI prefix and original DataCite DOI prefix.
+```update_doi_metadata.py``` updates the metadata of the DOIs in DataCite using the DataCite REST API, picking xml records from the ```extracted_dir``` folder. If working in the test environment, update your ```config.json``` file by adding your DataCite test DOI prefix and original DataCite DOI prefix.
+
+The scripts parses each record finding the record's original DOI. If the DOI is a DataCite DOI (if its prefix corresponds to ```original_doi_prefix```), then it substitutes the original prefix with the ```test_doi_prefix``` (if specified). Otherwise, the script tries to update the record using the original DOI.
 
 ## Prerequisites
 
