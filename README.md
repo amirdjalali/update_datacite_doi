@@ -10,7 +10,7 @@ The script downloads the current metadata from an OAI-PMH interface (```oai_base
 
 ## ```extract_resource_elements.py```
 
-In case the metadata are exposed in the ```oai_datacite``` metadata schema, ```extract_resource_elements.py``` you might want to keep only the ```<resource>``` elements in the records contained in the ```downloaded_dir``` folder.
+In case the metadata are exposed in the ```oai_datacite``` metadata schema, you might want to keep only the ```<resource>``` element in the records contained in the ```downloaded_dir``` folder. Use the ```extract_resource_elements.py``` script to do that.
 
 ## ```update_doi_metadata.py``` 
 
@@ -42,7 +42,7 @@ where ```payload``` is a dictionary with the following strcuture:
     }
 ```
 
-```xml``` contains the base-64 encoding of the record to update. ```url``` is parsed from the record's XML.
+the ```xml``` value contains the base-64 encoding of the record to update. ```url``` is parsed from the record's XML.
 
 If working in the test environment, update your ```config.json``` file by adding your DataCite test DOI prefix and original DataCite DOI prefix.
 
