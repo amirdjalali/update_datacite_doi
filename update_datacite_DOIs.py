@@ -1,8 +1,11 @@
 import requests
 import base64
 import json
-import xml.etree.ElementTree as ET
+from lxml import etree
 import os
+import csv
+from datetime import datetime
+import calendar
 
 def load_config(config_path='config.json'):
     """
@@ -46,7 +49,7 @@ def prepare_datacite_doi_payload(config, xml_path):
     original_doi_prefix = config["original_doi_prefix"]
 
     # Parse the XML resource
-    tree = ET.parse(xml_path)
+    tree = etree.parse(xml_path)
     root = tree.getroot()
 
     # get id from record
@@ -110,6 +113,8 @@ def create_doi(config, xml_path, xml_base64=True):
     password = config["password"]
     url = config["api_base_url"]
 
+    log = [] # for logging
+
     try:
         # Prepare payload for DOI metadata
         payload, full_doi = prepare_datacite_doi_payload(config, xml_path)
@@ -151,18 +156,25 @@ def create_doi(config, xml_path, xml_base64=True):
         # Check response
         if response.status_code in [200, 201]:
             print(f"Successfully created DOI: {full_doi}")
-            return full_doi
+            log = {
+                "doi": full_doi,
+                "Status code": response.status_code
+            }
+            return log
         else:
             print(f"Failed to create DOI. Status code: {response.status_code}")
             print(f"Response: {response.text}")
-
-            return None
+            log = {
+                "doi": full_doi,
+                "Status code": response.status_code,
+                "Response": response.json()
+            }
+            return log
         
     except Exception as e:
         print(f"Error creating DOI: {e}")
         return None
-
-# Example usage
+    
 def batch_create_dois(config):
     """
     Create DOIs for all XML files in a directory
@@ -181,27 +193,38 @@ def batch_create_dois(config):
         return
 
     # Track created DOIs
-    created_dois = []
+    output = []
+    not_created_dois = []
 
     # Iterate through XML files
-    for filename in os.listdir(xml_directory):
-        if filename.endswith('.xml'):
-            xml_path = os.path.join(xml_directory, filename)
-            
-            try:
-                # Create DOI for each XML file
-                doi = create_doi(config, xml_path)
-                if doi:
-                    created_dois.append((filename, doi))
-            
-            except Exception as e:
-                print(f"Error processing {filename}: {e}")
+    for root, dirs, files in os.walk(xml_directory):
+        for filename in files:
+            if filename.endswith('.xml'):
+                xml_path = os.path.join(root, filename)
 
-    # Optional: Log created DOIs
-    print("\nCreated DOIs:")
-    for filename, doi in created_dois:
-        print(f"{filename}: {doi}")
+                try:
+                    # Create DOI for each XML file
+                    log = create_doi(config, xml_path)
+                    if log:
+                        output.append(log)
+                
+                except Exception as e:
+                    print(f"Error processing {filename}: {e}")
+                    not_created_dois.append([filename, log["doi"], e])
 
+    # Log created DOIs
+    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M")
+    dois_created_filename = f"logs/dois_created_{timestamp}.json"
+    dois_not_created_filename = f"logs/dois_not_created_{timestamp}.json"
+
+    with open(dois_created_filename, "w", encoding="UTF-8") as f:
+        json.dump(output, f, indent=4)
+
+    with open(dois_not_created_filename, "w", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerow(["File", "DOI", "Error"])
+        writer.writerows(not_created_dois)
+    
 # Usage example (commented out for safety)
 # batch_create_dois(
 #     xml_directory='path/to/extracted/resources', 
@@ -209,7 +232,6 @@ def batch_create_dois(config):
 #     username='your_username', 
 #     password='your_password'
 # )
-
 
 if __name__ == "__main__":
     config = load_config()

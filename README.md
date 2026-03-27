@@ -1,6 +1,6 @@
 # Update DOI metadata in DataCite
 
-This repository contains scripts to update the metadata of DOIs registered with DataCite.
+This repository contains scripts to update the metadata of DOIs registered with [https://support.datacite.org/docs/api-create-dois](DataCite).
 
 In order to work, it needs a ```config.json``` [configuration](#configuration) file.
 
@@ -12,7 +12,19 @@ The script downloads the current metadata from an OAI-PMH interface (```oai_base
 
 In case the metadata are exposed in the ```oai_datacite``` metadata schema, you might want to keep only the ```<resource>``` element in the records contained in the ```downloaded_dir``` folder. Use the ```extract_resource_elements.py``` script to do that.
 
-## ```update_doi_metadata.py``` 
+## ```validate_datacite_records.py```
+
+Validates DataCite metadata against the DataCite schema and logs the results. Usage:
+
+```
+validate_all(<path to schema dir>, <path to resource xml folder>, "https://schema.datacite.org/meta/kernel-4/", <path to log folder>)
+```
+
+## ```generate_report.py```
+
+Looks for the ```validation_results.json``` file within the ```logs/``` folder and creates a neat report grouping records with the same validation errors.
+
+## ```update_datacite_DOIs.py``` 
 
 The script updates the metadata of the DOIs in DataCite using the DataCite REST API, picking xml records from the ```extracted_dir``` folder. It sends a PUT request:
 
@@ -51,7 +63,7 @@ The script parses each record finding the record's original DOI. If the DOI is a
 ## Prerequisites
 
 - Python 3.x
-- Required Python packages: requests, xml.etree.ElementTree, lxml
+- Works with the following Python packages: requests 2.32.5, lxml 6.0.2
 - DataCite account with API access
 
 ## Configuration

@@ -1,6 +1,8 @@
-config.json
+*.json
 oai_harvest.log
 oai_xml_records/**
 extracted_xml_resources/**
 tests/**
+logs/**
+.vscode/**
 *.old
