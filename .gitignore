@@ -4,5 +4,6 @@ oai_xml_records/**
 extracted_xml_resources/**
 tests/**
 logs/**
+schema/**
 .vscode/**
 *.old
