@@ -1,5 +1,5 @@
 __pycache__/
-schema/**gi
+schema/**
 config.json
 latest.json
 all_records.json
