@@ -4,6 +4,10 @@ This repository contains scripts to update the metadata of DOIs registered with 
 
 In order to work, it needs a ```config.json``` [configuration](#configuration) file.
 
+## ```main.py```
+
+Run ```main.py``` to use a command-line user interface.
+
 ## ```download_xml_records.py``` 
 
 The script downloads the current metadata from an OAI-PMH interface (```oai_base_url```), and saves them in separate xml files in the ```downloaded_dir``` folder.
