@@ -1,6 +1,9 @@
 __pycache__/
-schema/**
-*.json
+schema/**gi
+config.json
+latest.json
+all_records.json
+selected_records.json
 oai_harvest.log
 oai_xml_records/**
 tests/
@@ -9,3 +12,4 @@ downloads/**
 extracted/**
 .vscode/
 *.old
+select_test_records.py

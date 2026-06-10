@@ -76,10 +76,12 @@ The ```config.json``` file should look like this:
 {
     "oai_base_url": "<your OAI-PMH base URL>",
     "api_base_url": "<https://api.test.datacite.org/dois> or <https://api.datacite.org/dois>",
-    "downloaded_dir": "oai_xml_records",
-    "extracted_dir": "extracted_xml_resources",
-    "test_doi_prefix": "your test DOI prefix, without /. Add only if you are working in the test environment",
-    "original_doi_prefix": "your original DOI prefix, without /. Add only if you are working in the test environment",
+    "downloaded_dir": "downloads/",
+    "extracted_dir": "extracted/",
+    "logs_dir": "logs/",
+    "reports_dir": "reports/",
+    "test_doi_prefix": "<your test DOI prefix, without /. Add only if you are working in the test environment>",
+    "original_doi_prefix": "<your original DOI prefix, without />",
     "user": "<your DataCite username>",
     "password": "<your DataCite password>"
 }

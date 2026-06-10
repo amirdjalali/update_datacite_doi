@@ -44,7 +44,7 @@ def prepare_datacite_doi_payload(config, xml_path):
     :return: Dictionary with payload for DOI creation
     """
 
-    test_doi_prefix = config["out_doi_prefix"]
+    test_doi_prefix = config["test_doi_prefix"]
     original_doi_prefix = config["original_doi_prefix"]
 
     # Parse the XML resource

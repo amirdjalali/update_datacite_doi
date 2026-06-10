@@ -87,8 +87,11 @@ while selection != 4:
         reports_path = generate_report(validation_result_path, config["logs_dir"])
 
     elif selection == 3:
-
-        print(f"Updating or creating DOIs to {config["out_doi_prefix"]}, as {config["user"]}, using password {"*"*len(config["password"])}")
+        if config["test_doi_prefix"] != "":
+            out_doi_prefix = config["test_doi_prefix"]
+        else:
+            out_doi_prefix = config["original_doi_prefix"]
+        print(f"Updating or creating DOIs to {config["test_doi_prefix"]}, as {config["user"]}, using password {"*"*len(config["password"])}")
         print("Are your REALLY sure? Type YES to continue:", end=" ")
         reply = input()
         if reply == "YES":
