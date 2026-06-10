@@ -1,7 +1,7 @@
 import json
 from collections import defaultdict, Counter
 from datetime import date
-
+import os
 
 def categorise(msg):
     if 'resourceTypeGeneral' in msg and 'enumeration' in msg:
@@ -44,10 +44,14 @@ FIXES = {
 }
 
 
-def generate_report(results_path, out_path):
+def generate_report(results_path, out_dir="logs/"):
     with open(results_path) as f:
         data = json.load(f)
 
+    out_dir.replace("/", os.sep)
+    out_path = os.path.join(out_dir, ("validation_report_" + results_path[-24:-5] + ".txt"))
+    print(out_path)
+    
     total = len(data)
     valid = sum(1 for v in data.values() if v['valid'])
     invalid = total - valid
@@ -98,6 +102,9 @@ def generate_report(results_path, out_path):
         f.write(report)
     print(f"Report written to: {out_path}")
 
+    return out_path
+
 
 if __name__ == "__main__":
-    generate_report("logs/validation_results.json", "logs/validation_report.txt")
+    filename = os.path.join("logs", "validation_report_") + date.today().isoformat() + ".txt"
+    generate_report("logs/validation_results_2026-06-09_13-14-14.json", filename)

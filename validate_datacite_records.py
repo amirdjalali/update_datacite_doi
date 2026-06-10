@@ -1,6 +1,7 @@
 import os
 from lxml import etree
 import urllib.request
+from datetime import datetime
 import json
 
 # The W3C xml.xsd defines the built-in xml:lang / xml:space / xml:base attributes.
@@ -27,8 +28,9 @@ def download_xsd(schema_dir, base_url, path, visited=None):
     if path in visited:
         return
     visited.add(path)
+    print(f"Processing schema: {path}")
 
-    url = base_url + path
+    url = (base_url + path).replace(os.sep, "/")  # Ensure consistent path separators
     local_path = os.path.join(schema_dir, path)
     os.makedirs(os.path.dirname(local_path), exist_ok=True)
 
@@ -47,9 +49,9 @@ def download_xsd(schema_dir, base_url, path, visited=None):
         resolved = os.path.normpath(os.path.join(current_dir, inc_path))
         download_xsd(schema_dir, base_url, resolved, visited)
 
-def validate_all(schema_dir, xml_dir, base_url, out_dir):
+def validate_all(xml_dir, out_dir="logs/", schema_dir="schema", base_url="https://schema.datacite.org/meta/kernel-4/"):
 
-    download_xsd(schema_dir, base_url, "metadata.xsd")
+    download_xsd(schema_dir.replace("/", os.sep), base_url, "metadata.xsd")
 
     # Download the W3C xml.xsd so lxml can resolve xml:lang references
     xml_xsd_local = os.path.join(schema_dir, "xml.xsd")
@@ -80,12 +82,12 @@ def validate_all(schema_dir, xml_dir, base_url, out_dir):
             except etree.XMLSyntaxError as e:
                 results[filename] = {"valid": False, "errors": [f"Malformed XML: {e}"]}
 
-    out_path = os.path.join(out_dir, "validation_results.json")
+    out_path = os.path.join(out_dir, ("validation_results_" + xml_dir[-19:] + ".json"))
     with open(out_path, "w", encoding="UTF-8") as out_file:
         json.dump(results, out_file, indent=4)
 
     print(f"Validation complete. Results written to: {out_path}")
-    return results
+    return out_path
 
 if __name__ == "__main__":
-    validate_all("schema/", "tests/extracted_xml_resources_all/", "https://schema.datacite.org/meta/kernel-4/", "logs/")
+    validate_all(os.path.join("tests", "selected_xml_resources_2026-06-09_12-40-00"), "schema/", "https://schema.datacite.org/meta/kernel-4/", "logs/")

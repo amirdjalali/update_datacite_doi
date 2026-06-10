@@ -1,6 +1,7 @@
 import requests
 import os
 import json
+from datetime import datetime
 from lxml import etree
 
 def load_config(config_path='config.json'):
@@ -19,10 +20,13 @@ def load_config(config_path='config.json'):
         print(f"Invalid JSON in {config_path}")
         return None
 
-def download_oai_pmh_records(config):
-    base_url = config['oai_base_url']
-    output_dir = config["downloaded_dir"]
+def download_oai_pmh_records(base_url=None, output_dir=None):
+    if not base_url:
+        base_url = config['oai_base_url']
+    if not output_dir:
+        output_dir =config["downloaded_dir"]
     
+    output_dir = os.path.join(output_dir, datetime.today().strftime('%Y-%m-%d_%H-%M-%S'))
     os.makedirs(output_dir, exist_ok=True)
     
     params = {
@@ -82,8 +86,10 @@ def download_oai_pmh_records(config):
     
     print(f'Total records downloaded: {record_count}')
 
+    return output_dir
+
 # Usage
 if __name__ == "__main__":
     config = load_config()
     if config:
-        download_oai_pmh_records(config)
+        download_oai_pmh_records()

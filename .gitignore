@@ -1,9 +1,11 @@
+__pycache__/
+schema/**
 *.json
 oai_harvest.log
 oai_xml_records/**
-extracted_xml_resources/**
-tests/**
+tests/
 logs/**
-schema/**
-.vscode/**
+downloads/**
+extracted/**
+.vscode/
 *.old

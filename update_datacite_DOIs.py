@@ -5,7 +5,6 @@ from lxml import etree
 import os
 import csv
 from datetime import datetime
-import calendar
 
 def load_config(config_path='config.json'):
     """
@@ -45,7 +44,7 @@ def prepare_datacite_doi_payload(config, xml_path):
     :return: Dictionary with payload for DOI creation
     """
 
-    test_doi_prefix = config["test_doi_prefix"]
+    test_doi_prefix = config["out_doi_prefix"]
     original_doi_prefix = config["original_doi_prefix"]
 
     # Parse the XML resource
@@ -175,7 +174,7 @@ def create_doi(config, xml_path, xml_base64=True):
         print(f"Error creating DOI: {e}")
         return None
     
-def batch_create_dois(config):
+def batch_create_dois(xml_directory, logs_dir="logs/", config_url=None):
     """
     Create DOIs for all XML files in a directory
     
@@ -184,8 +183,13 @@ def batch_create_dois(config):
     :param username: DataCite API username
     :param password: DataCite API password
     """
+    if not config_url:
+        config = load_config()
+    else:
+        config = load_config(config_url)
 
-    xml_directory = config["extracted_dir"]
+    xml_directory = os.path.normpath(xml_directory)
+    logs_dir = os.path.normpath(logs_dir)
 
     # Ensure the directory exists
     if not os.path.exists(xml_directory):
@@ -214,8 +218,8 @@ def batch_create_dois(config):
 
     # Log created DOIs
     timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M")
-    dois_created_filename = f"logs/dois_created_{timestamp}.json"
-    dois_not_created_filename = f"logs/dois_not_created_{timestamp}.json"
+    dois_created_filename = os.path.join(logs_dir, f"dois_created_{timestamp}.json")
+    dois_not_created_filename = os.path.join(logs_dir, f"dois_not_created_{timestamp}.json")
 
     with open(dois_created_filename, "w", encoding="UTF-8") as f:
         json.dump(output, f, indent=4)
@@ -224,6 +228,8 @@ def batch_create_dois(config):
         writer = csv.writer(f)
         writer.writerow(["File", "DOI", "Error"])
         writer.writerows(not_created_dois)
+
+    return dois_created_filename, dois_not_created_filename
     
 # Usage example (commented out for safety)
 # batch_create_dois(

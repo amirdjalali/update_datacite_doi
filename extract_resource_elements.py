@@ -1,5 +1,6 @@
 import os
 import json
+from datetime import datetime
 from lxml import etree
 
 def load_config(config_path='config.json'):
@@ -18,19 +19,20 @@ def load_config(config_path='config.json'):
         print(f"Invalid JSON in {config_path}")
         return None
 
-def extract_resource_element(config):
+def extract_resource_element(extracted_dir=None, input_dir=None):
     """
     Extract only the <resource> element from OAI-PMH XML files.
     
     Args:
         config (dict): Configuration dictionary containing directories.
     """
-   
-    input_dir = config["downloaded_dir"]
-    output_dir = config["extracted_dir"]
+    if not input_dir:
+        print("No input dir selected")
 
-    print(input_dir)
-    print(output_dir)
+    output_dir = os.path.join(extracted_dir, ("extracted_xml_resources_" + input_dir[-19:]))
+
+    print(f"Extracting <resource> elements from xml records in {input_dir}")
+    print(f"Saving extracted <resource> elements in {output_dir}")
 
     # Create output directory if it doesn't exist
     os.makedirs(output_dir, exist_ok=True)
@@ -72,8 +74,10 @@ def extract_resource_element(config):
             
             except Exception as e:
                 print(f"Error processing {filename}: {e}")
+    
+    return output_dir
 
 # Usage
 if __name__ == "__main__":
     config = load_config("config.json")
-    extract_resource_element(config)
+    extract_resource_element(config, "oai_xml_records_2026-06-09")
